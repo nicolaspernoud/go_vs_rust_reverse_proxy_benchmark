@@ -51,7 +51,7 @@ async fn handler(mut req: Request<Body>) -> Response<Body> {
     match PROXY_CLIENT
         .call(
             IpAddr::try_from([127, 0, 0, 1]).unwrap(),
-            "http://127.0.0.1:8080",
+            "http://127.0.0.1:8090",
             req,
         )
         .await
