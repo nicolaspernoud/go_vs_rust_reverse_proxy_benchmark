@@ -5,13 +5,15 @@ WD="$(
     pwd -P
 )"
 
-BENCH_CMD="wrk -t8 -c400 -d20s https://localhost:1443"
+BENCH_CMD="rewrk -c 400 -t 8 -d 20s -h https://localhost:1443 --pct"
 
 #####################################################################
-#                            INSTALL WRK                            #
+#                            INSTALL RWRK                           #
 #####################################################################
 
-sudo apt install -y wrk
+sudo apt install -y libssl-dev
+sudo apt install -y pkg-config
+cargo install rewrk --git https://github.com/ChillFish8/rewrk.git
 
 #####################################################################
 #                              BACKEND                              #
@@ -38,6 +40,7 @@ ${WD}/axum_proxy/target/release/axum_proxy &
 AXUM_PROXY_PID=$!
 sleep 2
 # Test proxy
+echo -e "\n######################\n# TESTING RUST PROXY #\n######################\n"
 eval ${BENCH_CMD}
 # Shutdown
 kill $AXUM_PROXY_PID
@@ -55,6 +58,7 @@ ${WD}/go_proxy/go_proxy &
 GO_PROXY_PID=$!
 sleep 2
 # Test
+echo -e "\n######################\n#  TESTING GO PROXY  #\n######################\n"
 eval ${BENCH_CMD}
 # Shutdown
 kill $GO_PROXY_PID
