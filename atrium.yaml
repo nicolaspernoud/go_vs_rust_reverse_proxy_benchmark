@@ -1,0 +1,58 @@
+hostname: atrium.127.0.0.1.nip.io
+domain: 127.0.0.1.nip.io
+debug_mode: false
+http_port: 8080
+tls_mode: No
+letsencrypt_email: foo@bar.com
+cookie_key: 8szL6c9yzp7NVeCrCFcRGzjc5wMKWyryBO2aQk54gahT5CMeN8A7kMR9zOLPn46H
+session_duration_days: 1
+apps:
+  - id: 1
+    name: App 1
+    icon: web_asset
+    color: 4292030255
+    is_proxy: true
+    host: app1
+    target: localhost:8090
+    login: admin
+    password: ff54fds6f
+    openpath: /some/path
+    roles:
+      - ADMINS
+      - USERS
+    inject_security_headers: true
+    subdomains:
+      - app1-subdomain1
+      - app1.subdomain2
+davs:
+  - id: 1
+    host: files1
+    directory: ./data/dir1
+    name: Files 1
+    icon: folder
+    color: 4292030255
+  - id: 2
+    host: files2
+    directory: ./data/dir2
+    writable: true
+    name: Files 2
+    icon: folder
+    color: 4292030255
+    secured: true
+    roles:
+      - USERS
+      - ADMINS
+    passphrase: ABCD123
+users:
+  - login: admin
+    password: $argon2id$v=19$m=4096,t=3,p=1$QWsdpHrjCaPwy3IODegzNA$dqyioLh9ndJ3V7OoKpkCaczJmGNKjuG99F5hisd3bPs
+    roles:
+      - ADMINS
+    info:
+      firstname: Ad
+      lastname: Min
+      email: admin@atrium.io
+  - login: user
+    password: $argon2id$v=19$m=4096,t=3,p=1$ZH9ZFCT6YjYQpxkNt3SQgQ$g3DQawMEWlU1rnMAserFAzUg3Lg2O80s8eH+PrvmUo0
+    roles:
+      - USERS
