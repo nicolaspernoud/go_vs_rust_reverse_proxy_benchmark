@@ -5,7 +5,10 @@ WD="$(
     pwd -P
 )"
 
-BENCH_CMD="rewrk -c 400 -t 8 -d 20s -h http://app1.atrium.127.0.0.1.nip.io:8080 --pct"
+mkdir $WD/reports
+REPORT_FILE="$WD/reports/$(date +"%Y-%m-%d_%H:%M:%S")_test_atrium.txt"
+
+BENCH_CMD="rewrk -c 400 -t 8 -d 20s -h http://app1.atrium.127.0.0.1.nip.io:8080 --pct >> $REPORT_FILE"
 
 #####################################################################
 #                            INSTALL RWRK                           #
@@ -42,9 +45,33 @@ cd ${WD}/../atrium/backend/target/release/
 AXUM_PROXY_PID=$!
 sleep 2
 # Test proxy
+echo "### ATRIUM ###" >>$REPORT_FILE
 eval ${BENCH_CMD}
 # Shutdown
 kill $AXUM_PROXY_PID
+
+#####################################################################
+#                          ATRIUM IN DOCKER                         #
+#####################################################################
+
+# Build for production
+cd ${WD}/../atrium
+docker build --platform linux/amd64 -t atrium_bench .
+
+# Start proxy
+docker run -d --name atrium_bench \
+    -v ${WD}/atrium.yaml:/app/atrium.yaml \
+    --net=host \
+    atrium_bench
+sleep 2
+
+# Test proxy
+echo "### ATRIUM IN DOCKER ###" >>$REPORT_FILE
+eval ${BENCH_CMD}
+
+# Shutdown
+docker stop atrium_bench
+docker rm atrium_bench
 
 #####################################################################
 #                          BACKEND SHUTDOWN                         #

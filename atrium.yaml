@@ -1,5 +1,4 @@
 hostname: atrium.127.0.0.1.nip.io
-domain: 127.0.0.1.nip.io
 debug_mode: false
 http_port: 8080
 tls_mode: No
