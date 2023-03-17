@@ -79,3 +79,5 @@ docker rm atrium_bench
 
 # Shutdown backend
 kill $BACKEND_PID
+
+cat $REPORT_FILE
