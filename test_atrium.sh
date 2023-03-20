@@ -8,7 +8,9 @@ WD="$(
 mkdir $WD/reports
 REPORT_FILE="$WD/reports/$(date +"%Y-%m-%d_%H:%M:%S")_test_atrium.txt"
 
-BENCH_CMD="rewrk -c 400 -t 8 -d 20s -h http://app1.atrium.127.0.0.1.nip.io:8080 --pct >> $REPORT_FILE"
+BACKEND=http://app1.atrium.127.0.0.1.nip.io:8080
+TEST_CMD="curl ${BACKEND}"
+BENCH_CMD="rewrk -c 400 -t 8 -d 20s -h ${BACKEND} --pct >> $REPORT_FILE"
 
 #####################################################################
 #                            INSTALL RWRK                           #
@@ -31,6 +33,26 @@ BACKEND_PID=$!
 sleep 2
 
 #####################################################################
+#                               NGINX                               #
+#####################################################################
+
+# Start proxy
+docker run -d --name nginx_bench \
+    -v ${WD}/nginx_default.conf:/etc/nginx/conf.d/default.conf \
+    --net=host \
+    nginx
+sleep 2
+
+# Test proxy
+echo -e "#######################\n### NGINX IN DOCKER ###\n#######################\n" >>$REPORT_FILE
+eval ${TEST_CMD}
+eval ${BENCH_CMD}
+
+# Shutdown
+docker stop nginx_bench
+docker rm nginx_bench
+
+#####################################################################
 #                               ATRIUM                              #
 #####################################################################
 
@@ -45,7 +67,8 @@ cd ${WD}/../atrium/backend/target/release/
 AXUM_PROXY_PID=$!
 sleep 2
 # Test proxy
-echo "### ATRIUM ###" >>$REPORT_FILE
+echo -e "##############\n### ATRIUM ###\n##############\n" >>$REPORT_FILE
+eval ${TEST_CMD}
 eval ${BENCH_CMD}
 # Shutdown
 kill $AXUM_PROXY_PID
@@ -66,7 +89,8 @@ docker run -d --name atrium_bench \
 sleep 2
 
 # Test proxy
-echo "### ATRIUM IN DOCKER ###" >>$REPORT_FILE
+echo -e "########################\n### ATRIUM IN DOCKER ###\n########################\n" >>$REPORT_FILE
+eval ${TEST_CMD}
 eval ${BENCH_CMD}
 
 # Shutdown
